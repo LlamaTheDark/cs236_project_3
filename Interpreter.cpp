@@ -1,11 +1,11 @@
 #include "Interpreter.h"
 #include "Tuple.h"
+#include "vendor/utils/FileHelper.h"
+#include "vendor/parser/Parameter.h"
 
 #include <vector>
 
 Interpreter::Interpreter(DatalogProgram *dp): dp(dp){
-
-    std::cout << "does anything work anymore?" << std::endl;
 
     db = Database();
 
@@ -31,7 +31,9 @@ void Interpreter::evaluateQueries(){
     // for each query ‘q’
     for(auto query : *(dp->getQueries())){
         Relation *r = evaluatePredicate(query);
-        std::cout << r << std::endl;
+        if(!FileHelper::write("out/tests/output.txt", r->toString()))
+            std::cout << "Failed to write file" << std::endl;
+        // std::cout << *r << std::endl;
     }
 }
 
@@ -40,14 +42,15 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     nonConsts is a map that links each non-constant (variable) parameter we've seen to the index
     that it first appeared.
     */
-    std::map<std::string*, int> variables;
+    std::map<Parameter*, int> variables;
 
     //     get the relation ‘r’ with the same name as the query ‘q’
     Relation *result = new Relation();
     *result = *db.getRelation(query->getId());
+
     Relation *tmp;
 
-    std::vector<Parameter *> queryParameters = *(query->getParameters());
+    std::vector<Parameter*> queryParameters = *(query->getParameters());
 
     for(unsigned int i = 0; i < queryParameters.size(); i++){
     //     select for each constant in the query ‘q’
@@ -61,7 +64,7 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
             // auto it = variables.find(queryParameters.at(i)->toString());
             auto it = variables.begin();
             while(it != variables.end() 
-                    && it->first->compare(*queryParameters.at(i)->toString()) != 0) { it++; }
+                    && it->first->toString()->compare(*queryParameters.at(i)->toString()) != 0) { it++; }
 
             if( it != variables.end() ){
                 tmp = result->select(i, it->second);
@@ -70,8 +73,7 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
             }
             // so we have the positions of each variable. Note: this will only store
             // the most recent variable index
-            // NOTE: this might horribly fail because a string is just a (const char*)
-            variables[queryParameters.at(i)->toString()] = i;
+            variables[queryParameters.at(i)] = i;
         }
     }
     //     project using the positions of the variables in ‘q’
@@ -80,24 +82,21 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     int *indices = new int(variables.size());
 
     //     rename to match the names of variables in ‘q’
-    Header *attributes = new Header();
-
     for(auto var : variables){
         *(indices+count) = var.second;
         count++;
-
-        attributes->addAttribute(var.first);
     }
+
+    // rename
+    tmp = result->rename(variables);
+    *result = *tmp;
+    delete tmp;
 
     // project
     tmp = result->project(indices, count);
     *result = *tmp;
     delete tmp;
 
-    // rename
-    tmp = result->rename(attributes);
-    *result = *tmp;
-    delete tmp;
 
 
     /*

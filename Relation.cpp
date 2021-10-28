@@ -7,7 +7,7 @@ Relation::Relation() {}
 Relation::Relation(std::string *name, Header *header): name(name), header(header) {}
 
 void Relation::addInstance(Tuple *instance){
-    if(instance->getLength() == header->getAttributesLength()){
+    if(instance->getLength() == header->getLength()){
         instances.insert(instance);
     }else{
         // throw error
@@ -38,7 +38,7 @@ Relation *Relation::project(int *indices, unsigned int count) const {
     Header *h = new Header();
     Relation *r = new Relation(name, h);
     for(unsigned int i = 0; i < count; i++){
-        h->addAttribute(header->getAttributeName(*(indices+i)));
+        h->addAttribute(header->getAttribute(*(indices+i)));
     }
     for(auto i : instances){
         Tuple *t = new Tuple();
@@ -49,8 +49,14 @@ Relation *Relation::project(int *indices, unsigned int count) const {
     }
     return r;
 }
-Relation *Relation::rename(Header *h) const {
+Relation *Relation::rename(std::map<Parameter*, int> &attributes) const {
+    Header *h = new Header();
+    *h = *header;
     Relation *r = new Relation(name, h);
+    
+    for(auto it = attributes.begin(); it != attributes.end(); it++){
+        h->setAttribute(&it->first->toString(), it->second);
+    }
     for(auto i : instances){
         r->addInstance(i);
     }
@@ -64,8 +70,8 @@ std::string *Relation::getName() const {
 std::string Relation::toString() const {
     std::ostringstream result;
     for (Tuple *t : instances){
-        for(unsigned int i = 0; i < header->getAttributesLength(); i++){
-            result << *(header->getAttributeName(i)) << "=" << *t->getValue(i) << ", ";
+        for(unsigned int i = 0; i < header->getLength(); i++){
+            result << *(header->getAttribute(i)) << "=" << *t->getValue(i) << ", ";
         }
         result << std::endl;
     }

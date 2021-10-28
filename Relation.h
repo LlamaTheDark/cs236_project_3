@@ -3,9 +3,11 @@
 
 #include "Header.h"
 #include "Tuple.h"
+#include "vendor/parser/Parameter.h"
 
 #include <string>
 #include <set>
+#include <map>
 
 class Relation {
 private:
@@ -43,11 +45,12 @@ public:
     */
     Relation *project(int *indices, unsigned int count) const;
     /*
-    @param attributes: a pointer to a list of strings to define a new header
-    @param count: the number of attributes in the list
+    @param attributes: A map which maps a pointer to a parameter to an int. Each parameter is
+    an attribute that should be added to the header at the specified index. For each index not
+    in the map, the header just uses it's original attribute.
     @return A new relation with the header changed to the new list of attribtues
     */
-    Relation *rename(Header *h) const;
+    Relation *rename(std::map<Parameter*, int> &attributes) const;
 
     std::string *getName() const;
 

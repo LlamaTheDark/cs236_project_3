@@ -28,9 +28,9 @@ void DatalogProgram::start(TokenList &input, bool showSuccessOutput) {
         }
     }catch(int e){
         std::cout << "Failure!" << std::endl;
-        std::cout << "  " << input.at(index)->toString(true) << std::endl;
-        //  << " which is the " << index+1 << "th token" << std::endl;
-        // std::cerr << "Program failed with exit code: (" << e << ")" << std::endl;
+        std::cout << "  " << input.at(index)->toString(true) << std::endl
+         << " which is the " << index+1 << "th token" << std::endl;
+        std::cerr << "Program failed with exit code: (" << e << ")" << std::endl;
     }    
 }
 

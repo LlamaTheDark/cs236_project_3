@@ -11,15 +11,16 @@ public:
     Header();
 
     void addAttribute(std::string *attribute);
+    void setAttribute(std::string *attribute, int index);
 
     /*
     @param index: the index of the attribute whose name is desired
     @return a pointer to the string containing the attribute's name
     
     */
-    std::string *getAttributeName(int index);
+    std::string *getAttribute(int index);
 
-    unsigned int getAttributesLength();
+    unsigned int getLength();
 };
 
 #endif /* HEADER_H */

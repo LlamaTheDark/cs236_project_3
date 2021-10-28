@@ -65,3 +65,12 @@ int main(int argc, char **argv){
 
     return 0;
 }
+
+
+/*
+
+TODO:
+ - maps won't sort strings correctly if you store them as pointers, so you'll have to fix that.
+ - just too many pointers in general. You need some major refactoring of your pointer business you went way overboard.
+ - OKAY SO WHAT YOU SHOULD HAVE DONE IS USE PARAMETERS INSTEAD OF STRINGS EVERYWHERE THAT'S LITERALLY WHY THE PARAMETER CLASS EXISTS YOU RETARD
+*/
