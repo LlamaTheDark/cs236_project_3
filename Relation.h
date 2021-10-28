@@ -11,18 +11,21 @@
 
 class Relation {
 private:
-    std::string *name;
+    std::string name;
     Header *header;
     std::set<Tuple*> instances;
+
+    void removeDuplicates(Relation &r);
 public:
     Relation();
-    Relation(std::string *name, Header *header);
+    Relation(std::string name, Header *header);
 
     /*
     Adds an instance to the relation (i.e. adds another row to the table).
     @param instance: the tuple to be added
     */
     void addInstance(Tuple *instance);
+    bool containstInstance(Tuple* instance);
 
     /*
     Selects rows that contain a specific value for a given column
@@ -30,14 +33,14 @@ public:
     @param value: value to select
     @return A new relation object with only the tuples selected.
     */
-    Relation *select(unsigned int index, std::string *value) const;
+    Relation *select(unsigned int index, Parameter *value) const;
     /*
     This function selects rows for which values in columns at indices colA and colB are the same.
-    @param colA: the first column whose values are to be compared with the second column
-    @param colB: the second column
+    @param a: the first column whose values are to be compared with the second column
+    @param b: the second column
     @return A new relation object which only contains the selected tuples
     */
-    Relation *select(int colA, int colB) const;
+    Relation *select(int a, int b) const;
     /*
     @param indices: A pointer to a list of the indices of the columns we want to keep.
     @param count: the number of indices in the list
@@ -52,8 +55,10 @@ public:
     */
     Relation *rename(std::map<Parameter*, int> &attributes) const;
 
-    std::string *getName() const;
+    bool isEmpty() const { return instances.empty(); }
+    int getInstanceCount() const { return instances.size(); }
 
+    std::string getName() const;
     std::string toString() const;
 
     friend std::ostream &operator<<(std::ostream &out, const Relation &r);

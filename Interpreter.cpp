@@ -4,37 +4,52 @@
 #include "vendor/parser/Parameter.h"
 
 #include <vector>
+#include <sstream>
 
 Interpreter::Interpreter(DatalogProgram *dp): dp(dp){
-
     db = Database();
 
     // evaluate schemes
     for(auto scheme : *(dp->getSchemes())){
         Header *header = new Header();
+
         for(auto parameter : *(scheme->getParameters())){
-            header->addAttribute(parameter->toString());
+            header->addAttribute(parameter);
         }
-        db.addRelation(new Relation(scheme->getId(), header));
+
+        std::string *name = scheme->getId();
+        db.addRelation(*name, new Relation(*name, header));
     }
     // evalutate facts
     for(auto fact : *(dp->getFacts())){
         Tuple *instance = new Tuple();
+
         for(auto parameter : *(fact->getParameters())){
-            instance->addValue(parameter->toString());
+            instance->addValue(parameter);
         }
-        db.getRelation(fact->getId())->addInstance(instance);
+
+        db.getRelation( *fact->getId() )->addInstance(instance);
     }
+
 }
 
 void Interpreter::evaluateQueries(){
+    std::ostringstream oss;
     // for each query ‘q’
     for(auto query : *(dp->getQueries())){
         Relation *r = evaluatePredicate(query);
-        if(!FileHelper::write("out/tests/output.txt", r->toString()))
-            std::cout << "Failed to write file" << std::endl;
-        // std::cout << *r << std::endl;
+        oss << *query << "?";
+        if(r->isEmpty()){
+            oss << " No";
+        }else{
+            oss << " Yes(" << r->getInstanceCount() << ")" << std::endl;
+            oss << *r;
+        }
     }
+    oss << std::endl;
+    if(!FileHelper::write("out/tests/output.txt", oss.str()))
+        std::cout << "Failed to write file" << std::endl;
+
 }
 
 Relation *Interpreter::evaluatePredicate(Predicate *query){
@@ -46,8 +61,7 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
 
     //     get the relation ‘r’ with the same name as the query ‘q’
     Relation *result = new Relation();
-    *result = *db.getRelation(query->getId());
-
+    *result = *db.getRelation( *query->getId() );
     Relation *tmp;
 
     std::vector<Parameter*> queryParameters = *(query->getParameters());
@@ -55,25 +69,37 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     for(unsigned int i = 0; i < queryParameters.size(); i++){
     //     select for each constant in the query ‘q’
         if(queryParameters.at(i)->isConstant()){
-            tmp = result->select(i, queryParameters.at(i)->toString());
             // selects all instances (rows) that have the value queryParameters[i] in column i
+            tmp = result->select(i, queryParameters.at(i));
             *result = *tmp;
             delete tmp;
         }else{
     //     select for each pair of matching variables in ‘q’
             // auto it = variables.find(queryParameters.at(i)->toString());
-            auto it = variables.begin();
-            while(it != variables.end() 
-                    && it->first->toString()->compare(*queryParameters.at(i)->toString()) != 0) { it++; }
 
-            if( it != variables.end() ){
+            // search the map for anything with the same name
+            // if we have the same name, we want to select for those two columns
+            // if we can't find the same name, then we want to add the variable
+            //    to the map.
+
+            auto it = variables.begin();
+            while(
+                it != variables.end()
+                && *it->first != *queryParameters.at(i)
+            ){
+                it++;
+            }
+            // at this point, i should point to either the end of the map or the variable with the same name
+            // if it got to the end of the map, we want to select
+            // otherwise, we should add the variable to the map.
+
+            if(it == variables.end()){
+                variables[queryParameters.at(i)] = i;
+            }else{
                 tmp = result->select(i, it->second);
                 *result = *tmp;
                 delete tmp;
             }
-            // so we have the positions of each variable. Note: this will only store
-            // the most recent variable index
-            variables[queryParameters.at(i)] = i;
         }
     }
     //     project using the positions of the variables in ‘q’
@@ -96,8 +122,6 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     tmp = result->project(indices, count);
     *result = *tmp;
     delete tmp;
-
-
 
     /*
     TODO:

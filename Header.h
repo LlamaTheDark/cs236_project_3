@@ -1,24 +1,26 @@
 #ifndef HEADER_H
 #define HEADER_H
 
+#include "vendor/parser/Parameter.h"
+
 #include <vector>
 #include <string>
 
 class Header {
 private:
-    std::vector<std::string*> attributes;
+    std::vector<Parameter*> attributes;
 public:
     Header();
 
-    void addAttribute(std::string *attribute);
-    void setAttribute(std::string *attribute, int index);
+    void addAttribute(Parameter *attribute);
+    void setAttribute(Parameter *attribute, int index);
 
     /*
     @param index: the index of the attribute whose name is desired
     @return a pointer to the string containing the attribute's name
     
     */
-    std::string *getAttribute(int index);
+    Parameter *getAttribute(int index);
 
     unsigned int getLength();
 };

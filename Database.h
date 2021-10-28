@@ -2,13 +2,14 @@
 #define DATABASE_H
 
 #include "Relation.h"
+#include "vendor/parser/Parameter.h"
 
 #include <map>
 #include <string>
 
 class Database {
 private:
-    std::map<std::string*, Relation*> database;
+    std::map<std::string_view /* name of relation */, Relation*> database;
 public:
     Database();
 
@@ -16,7 +17,7 @@ public:
     Adds a relation to the relation database
     @param relation: the relation to be added
     */
-    void addRelation(Relation *relation);
+    void addRelation(std::string &name, Relation *relation);
 
     /*
     Gets a relation by its name
@@ -25,7 +26,7 @@ public:
     memory addresses.
     @return The relation with the given name
     */
-    Relation *getRelation(std::string *name);
+    Relation *getRelation(std::string &name);
 };
 
 #endif /* DATABASE_H */

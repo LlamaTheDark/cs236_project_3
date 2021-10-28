@@ -235,7 +235,7 @@ void DatalogProgram::parseParameter(TokenList &input, Predicate *p){
     TokenType currType = input.at(index)->getType();
     if(tokenInSet(FIRST_parameter, FIRST_parameter_c, currType)){
         p->addParameter(new Parameter(input[index]->getDescription(),
-                                        input[index-1]->getType() == TokenType::STRING));
+                                        input[index]->getType() == TokenType::STRING));
         index++;
     }else{
         throw -10;

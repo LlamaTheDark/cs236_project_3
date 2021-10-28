@@ -17,6 +17,10 @@ public:
 
     bool isConstant() { return constant; }
 
+    bool operator==(const Parameter &p) { return this->content == p.content; }
+    bool operator!=(const Parameter &p) { return !(this->content == p.content); }
+    bool operator<(const Parameter &p) { return this->content < p.content; }
+
     friend std::ostream &operator<<(std::ostream &out, const Parameter &p);
 };
 

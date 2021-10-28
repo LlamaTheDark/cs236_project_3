@@ -2,28 +2,23 @@
 
 Database::Database(){}
 
-void Database::addRelation(Relation *relation){
+void Database::addRelation(std::string &name, Relation *relation){
     // database.insert(
     //     std::pair<std::string*, Relation*>(
     //         relation->getName(),
     //         relation
     //     )
     // );
-    database[relation->getName()] = relation;
+
+    database[name] = relation;
 }
 
-Relation *Database::getRelation(std::string *name) {
+Relation *Database::getRelation(std::string &name) {
     for(auto it : database){
-        if(it.first->compare(*name) == 0){
+        if(it.first == name){
             return it.second;
         }
     }
-    // else throw a big doodoo error;
-    return new Relation();
-    // Relation *r = database[name];
-    // return r;
-    // return database[name];
+    std::cerr << "ERROR: Attempted to get relation with name \'" << name << "\' when none exists." << std::endl;
+    return NULL;
 }
-
-// YOU CAN'T COMPARE STRING POINTERS YOU DINGUS
-// YOU NEED SOME MAJOR REFACTORING - USE REFERENCES TO STRINGS INSTEAD OF POINTERS
