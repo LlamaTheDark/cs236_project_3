@@ -5,12 +5,12 @@
 
 Relation::Relation() {}
 Relation::Relation(std::string name, Header *header): name(std::move(name)), header(header) {}
+Relation::~Relation(){}
 
 void Relation::addInstance(Tuple *instance){
     if(instance->getLength() == header->getLength()){
         instances.insert(instance);
     }else{
-        // throw error
         std::cerr << "Failed to add instance; Tuple not the same size as header." << std::endl;
     }
 }
@@ -23,10 +23,10 @@ bool Relation::containstInstance(Tuple *instance){
     return false;
 }
 
-Relation *Relation::select(unsigned int index, Parameter *value) const {
+Relation *Relation::select(unsigned int index, std::string &value) const {
     Relation *r = new Relation(name, header);
     for(auto i : instances){
-        if(*value == *i->getValue(index)){
+        if(value == i->getValue(index)){
             r->addInstance(i);
         }
     }
@@ -35,7 +35,7 @@ Relation *Relation::select(unsigned int index, Parameter *value) const {
 Relation *Relation::select(int a, int b) const {
     Relation *r = new Relation(name, header);
     for(auto i : instances){
-        if(*i->getValue(a) == *i->getValue(b)){
+        if(i->getValue(a) == i->getValue(b)){
             r->addInstance(i);
         }
     }
@@ -60,7 +60,7 @@ Relation *Relation::project(int *indices, unsigned int count) const {
     }
     return r;
 }
-Relation *Relation::rename(std::map<Parameter*, int> &attributes) const {
+Relation *Relation::rename(std::map<std::string_view, int> &attributes) const {
     Header *h = new Header();
     *h = *header;
     Relation *r = new Relation(name, h);
@@ -79,24 +79,22 @@ std::string Relation::getName() const {
     return name;
 }
 
-void Relation::removeDuplicates(Relation &r){
-}
-
 std::string Relation::toString() const {
     int length = header->getLength();
     if( 
         isEmpty() // this shouldn't ever be the case
-        || length == 0
+        || length == 0 // if this is the case, there were no variables in our query. thus, we don't have to print anything
     ){
         return "";
     }
 
     std::ostringstream result;
     for (Tuple *t : instances){
+        result << "  ";
         for(int i = 0; i < length-1; i++){
-            result << "  " << *(header->getAttribute(i)) << "=" << *t->getValue(i) << ", ";
+            result << header->getAttribute(i) << "=" << t->getValue(i) << ", ";
         }
-        result << "  " << *(header->getAttribute(length-1)) << "=" << *t->getValue(length-1);
+        result << header->getAttribute(length-1) << "=" << t->getValue(length-1);
         result << std::endl;
     }
     return result.str();

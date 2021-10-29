@@ -3,7 +3,6 @@
 
 #include "Header.h"
 #include "Tuple.h"
-#include "vendor/parser/Parameter.h"
 
 #include <string>
 #include <set>
@@ -15,17 +14,17 @@ private:
     Header *header;
     std::set<Tuple*> instances;
 
-    void removeDuplicates(Relation &r);
+    bool containstInstance(Tuple* instance);
 public:
     Relation();
     Relation(std::string name, Header *header);
+    ~Relation();
 
     /*
     Adds an instance to the relation (i.e. adds another row to the table).
     @param instance: the tuple to be added
     */
     void addInstance(Tuple *instance);
-    bool containstInstance(Tuple* instance);
 
     /*
     Selects rows that contain a specific value for a given column
@@ -33,7 +32,7 @@ public:
     @param value: value to select
     @return A new relation object with only the tuples selected.
     */
-    Relation *select(unsigned int index, Parameter *value) const;
+    Relation *select(unsigned int index, std::string &value) const;
     /*
     This function selects rows for which values in columns at indices colA and colB are the same.
     @param a: the first column whose values are to be compared with the second column
@@ -53,7 +52,7 @@ public:
     in the map, the header just uses it's original attribute.
     @return A new relation with the header changed to the new list of attribtues
     */
-    Relation *rename(std::map<Parameter*, int> &attributes) const;
+    Relation *rename(std::map<std::string_view, int> &attributes) const;
 
     bool isEmpty() const { return instances.empty(); }
     int getInstanceCount() const { return instances.size(); }

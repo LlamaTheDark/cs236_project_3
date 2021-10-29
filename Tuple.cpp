@@ -2,10 +2,10 @@
 
 Tuple::Tuple(){}
 
-void Tuple::addValue(Parameter *value){
+void Tuple::addValue(std::string_view value){
     values.push_back(value);
 }
-Parameter *Tuple::getValue(int index) const {
+std::string_view Tuple::getValue(int index) const {
     return values.at(index);
 }
 

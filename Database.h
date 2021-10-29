@@ -2,7 +2,6 @@
 #define DATABASE_H
 
 #include "Relation.h"
-#include "vendor/parser/Parameter.h"
 
 #include <map>
 #include <string>
@@ -12,6 +11,7 @@ private:
     std::map<std::string_view /* name of relation */, Relation*> database;
 public:
     Database();
+    ~Database();
 
     /*
     Adds a relation to the relation database

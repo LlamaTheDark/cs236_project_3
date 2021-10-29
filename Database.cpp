@@ -1,15 +1,17 @@
+#include <iostream>
+
 #include "Database.h"
 
 Database::Database(){}
+Database::~Database(){
+    auto it = database.begin();
+    while(it != database.end()){
+        delete it->second;
+        it++;
+    }
+}
 
 void Database::addRelation(std::string &name, Relation *relation){
-    // database.insert(
-    //     std::pair<std::string*, Relation*>(
-    //         relation->getName(),
-    //         relation
-    //     )
-    // );
-
     database[name] = relation;
 }
 

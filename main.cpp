@@ -3,9 +3,12 @@
 #include <fstream>
 #include <string>
 
+#include "Interpreter.h"
+#include "vendor/lexer/Lexer.h"
+#include "vendor/parser/DatalogProgram.h"
+
 // #define MEMORY_TRACKING
 #ifdef MEMORY_TRACKING
-
 size_t total_mem_allocated = 0;
 
 void *operator new(size_t size){
@@ -22,10 +25,6 @@ void operator delete(void *ptr, size_t size){
     free(ptr);
 }
 #endif
-
-#include "Interpreter.h"
-#include "vendor/lexer/Lexer.h"
-#include "vendor/parser/DatalogProgram.h"
 
 int main(int argc, char **argv){    
     if(argc != 2){
@@ -53,24 +52,15 @@ int main(int argc, char **argv){
     lexer->Run(fileInput);
 
     DatalogProgram *datalogProgram = new DatalogProgram();
-    datalogProgram->start(lexer->getTokens(), true);
+    datalogProgram->start(lexer->getTokens(), false);
 
     Interpreter *interpreter = new Interpreter(datalogProgram);
     interpreter->evaluateQueries();
 
 
-    delete lexer;
-    delete datalogProgram;
     delete interpreter;
+    delete datalogProgram;
+    delete lexer;
 
     return 0;
 }
-
-
-/*
-
-TODO:
- - maps won't sort strings correctly if you store them as pointers, so you'll have to fix that.
- - just too many pointers in general. You need some major refactoring of your pointer business you went way overboard.
- - OKAY SO WHAT YOU SHOULD HAVE DONE IS USE PARAMETERS INSTEAD OF STRINGS EVERYWHERE THAT'S LITERALLY WHY THE PARAMETER CLASS EXISTS YOU RETARD
-*/

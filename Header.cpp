@@ -2,14 +2,14 @@
 
 Header::Header(){}
 
-void Header::addAttribute(Parameter *attribute){
+void Header::addAttribute(std::string_view attribute){
     attributes.push_back(attribute);
 }
-void Header::setAttribute(Parameter *attribute, int index){
+void Header::setAttribute(std::string_view attribute, int index){
     attributes.at(index) = attribute;
 }
 
-Parameter *Header::getAttribute(int index){
+std::string_view Header::getAttribute(int index){
     return attributes.at(index);
 }
 
