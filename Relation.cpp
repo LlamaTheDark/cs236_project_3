@@ -14,7 +14,7 @@ void Relation::addInstance(Tuple *instance){
         std::cerr << "Failed to add instance; Tuple not the same size as header." << std::endl;
     }
 }
-bool Relation::containstInstance(Tuple *instance){
+bool Relation::containsInstance(Tuple *instance){
     for(Tuple *t : instances){
         if(*t == *instance){
             return true;
@@ -42,25 +42,27 @@ Relation *Relation::select(int a, int b) const {
     return r;
 }
 
-Relation *Relation::project(int *indices, unsigned int count) const {
+Relation *Relation::project(const std::set<int> &indices) const {
     Header *h = new Header();
     Relation *r = new Relation(name, h);
-    for(unsigned int i = 0; i < count; i++){
-        h->addAttribute(header->getAttribute(*(indices+i)));
+
+    for(int i : indices){
+        h->addAttribute(header->getAttribute(i));
     }
-    for(auto i : instances){
+
+    for(auto instance : instances){
         Tuple *t = new Tuple();
-        for(unsigned int j = 0; j < count; j++){
-            t->addValue(i->getValue( *(indices+j) ));
+        for(int j : indices){
+            t->addValue(instance->getValue(j));
         }
-        if(!r->containstInstance(t))
+        if(!r->containsInstance(t))
             r->addInstance(t);
         else
             delete t;
     }
     return r;
 }
-Relation *Relation::rename(std::map<std::string_view, int> &attributes) const {
+Relation *Relation::rename(std::unordered_map<std::string_view, int> &attributes) const {
     Header *h = new Header();
     *h = *header;
     Relation *r = new Relation(name, h);
@@ -88,13 +90,48 @@ std::string Relation::toString() const {
         return "";
     }
 
+    /*
+    If you're reading this, you've found the part of the code that sorts the
+    set that is supposed to sort itself (supposedly. obviously if it worked we wouldn't be here).
+    I have not been able to find the set contained in each Relation object fails to
+    sort itself correctly. In a seperate, one file test I have tried but been unsuccessful
+    in even recreating the issue. In every case that I tried, it works. This includes the case
+    of storing my tuples as pointers in the set. So until I figure that out (as I likely will
+    before I turn in project 4) I'm stuck with manually sorting the tuples before I print them
+    to the output. I don't like it any more than you do. I'm sure it's something super stupid
+    and I'm gonna laugh real long and hard at myself for not getting it.
+
+    I'm compiling with g++, debugging with gdb, and have tested it on a seperate linux server I have running. idk man.
+
+    I also tried changing the < overload operator to accept a reference to a pointer but it no work.
+    I suppose because it's doing comparison for Tuple to Tuple* which isn't even what the set is supposed to do
+    but it doesn't let you define a comparison operator for Tuple* and Tuple* so BRUH idk what to do.
+
+    Okay yeah so the problem is that I'm storing pointers to Tuples instead of tuples themselves.
+    I'm sure I could have done this better but I'm too deep down the pointer train
+    there's no stopping me now
+
+    Yeah I gotta find a way to change how the set's compare function works with it's OWN
+    ELEMENTS AAAUGH.
+
+    Thing is when I did it in another file it worked perfectly fine pointers and all. Maybe I'm
+    just going insane.
+
+    Alright well this works so I'm going to sleep.
+    */
+
+   std::set<Tuple> instances;
+   for(auto instance : this->instances){
+       instances.insert(*instance);
+   }
+
     std::ostringstream result;
-    for (Tuple *t : instances){
+    for (Tuple t : instances){
         result << "  ";
         for(int i = 0; i < length-1; i++){
-            result << header->getAttribute(i) << "=" << t->getValue(i) << ", ";
+            result << header->getAttribute(i) << "=" << t.getValue(i) << ", ";
         }
-        result << header->getAttribute(length-1) << "=" << t->getValue(length-1);
+        result << header->getAttribute(length-1) << "=" << t.getValue(length-1);
         result << std::endl;
     }
     return result.str();

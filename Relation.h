@@ -6,7 +6,7 @@
 
 #include <string>
 #include <set>
-#include <map>
+#include <unordered_map>
 
 class Relation {
 private:
@@ -14,7 +14,7 @@ private:
     Header *header;
     std::set<Tuple*> instances;
 
-    bool containstInstance(Tuple* instance);
+    bool containsInstance(Tuple* instance);
 public:
     Relation();
     Relation(std::string name, Header *header);
@@ -41,18 +41,18 @@ public:
     */
     Relation *select(int a, int b) const;
     /*
-    @param indices: A pointer to a list of the indices of the columns we want to keep.
-    @param count: the number of indices in the list
+    @param indices: A set containing the indices of each column to be projected.
+    A set is used because it automatically sorts indices.
     @return A new relation with all but the specified columns removed.
     */
-    Relation *project(int *indices, unsigned int count) const;
+    Relation *project(const std::set<int> &indices) const;
     /*
     @param attributes: A map which maps a pointer to a parameter to an int. Each parameter is
     an attribute that should be added to the header at the specified index. For each index not
     in the map, the header just uses it's original attribute.
     @return A new relation with the header changed to the new list of attribtues
     */
-    Relation *rename(std::map<std::string_view, int> &attributes) const;
+    Relation *rename(std::unordered_map<std::string_view, int> &attributes) const;
 
     bool isEmpty() const { return instances.empty(); }
     int getInstanceCount() const { return instances.size(); }

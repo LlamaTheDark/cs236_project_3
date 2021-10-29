@@ -5,6 +5,8 @@
 
 #include <vector>
 #include <sstream>
+#include <set>
+#include <unordered_map>
 
 #define DEVMODE
 void submit(std::string &submission){
@@ -76,7 +78,7 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     nonConsts is a map that links each non-constant (variable) parameter we've seen to the index
     that it first appeared.
     */
-    std::map<std::string_view, int> variables;
+    std::unordered_map<std::string_view, int> variables;
 
     // get relevant relation
     *result = *db.getRelation( *query->getId() );
@@ -118,13 +120,11 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
             }
         }
     }
-    // build array containing indices of variables (if any)
-    unsigned int count = 0;
-    int *indices = new int(variables.size());
+    // build set containing indices of variables (if any)
+    std::set<int> indices;
 
     for(auto var : variables){
-        *(indices+count) = var.second;
-        count++;
+        indices.insert(var.second);
     }
 
     // rename relevant attributes to variables found in query
@@ -133,7 +133,7 @@ Relation *Interpreter::evaluatePredicate(Predicate *query){
     delete tmp;
 
     // project relevant columns (those with variables)
-    tmp = result->project(indices, count);
+    tmp = result->project(indices);
     *result = *tmp;
     delete tmp;
 

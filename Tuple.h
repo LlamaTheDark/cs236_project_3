@@ -15,8 +15,8 @@ public:
     void addValue(std::string_view value);
     std::string_view getValue(int index) const;
 
-    bool operator<(const Tuple *&rhs) const {
-        return values < rhs->values;
+    bool operator<(const Tuple &rhs) const {
+        return values < rhs.values;
     }
     bool operator==(const Tuple &rhs) const {
         for(unsigned int i = 0; i < values.size(); i++){
@@ -26,6 +26,8 @@ public:
         }
         return true;
     }
+
+    
 };
 
 #endif /* TUPLE_H */
